@@ -1,23 +1,24 @@
 import { prisma } from "../db.js";
 
-export async function getBooks(req, res) {
-  const books = await prisma.book.findMany();
-  res.json(books);
-}
-
-export async function getBook(req, res) {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return res.status(400).json({ message: "ID буруу" });
+export const getBooks = async (req, res) => {
+  try {
+    const books = await prisma.book.findMany({
+      include: { author: true },
+    });
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+};
 
-  const book = await prisma.book.findUnique({
-    where: { id },
-  });
-
-  if (!book) {
-    return res.status(404).json({ message: "Олдсонгүй" });
+export const createBook = async (req, res) => {
+  try {
+    const book = await prisma.book.create({
+      data: req.body,
+      include: { author: true },
+    });
+    res.status(201).json(book);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
-
-  res.json(book);
-}
+};
