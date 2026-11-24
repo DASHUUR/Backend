@@ -1,22 +1,15 @@
 import { prisma } from "../db.js";
 
-export const initialBooks = [
-  { id: 1, title: "Clean Code", author: "Robert C. Martin", price: 35, available: true },
-  { id: 2, title: "The Pragmatic Programmer", author: "Andrew Hunt", price: 42, available: true },
-  { id: 3, title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", price: 50, available: false },
-  { id: 4, title: "You Don't Know JS", author: "Kyle Simpson", price: 28, available: true }
-];
-
-export const getBooks = async (req, res) => {
+export const getBooks = async (req, res, next) => {
   try {
     const books = await prisma.book.findMany();
     res.json(books);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const createBook = async (req, res) => {
+export const createBook = async (req, res, next) => {
   try {
     const book = await prisma.book.create({
       data: req.body
@@ -27,9 +20,12 @@ export const createBook = async (req, res) => {
   }
 };
 
-export const updateBook = async (req, res) => {
+export const updateBook = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: "id тоо байх ёстой" });
+    }
     const book = await prisma.book.update({
       where: { id },
       data: req.body
@@ -40,9 +36,12 @@ export const updateBook = async (req, res) => {
   }
 };
 
-export const deleteBook = async (req, res) => {
+export const deleteBook = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: "id тоо байх ёстой" });
+    }
     await prisma.book.delete({
       where: { id }
     });
